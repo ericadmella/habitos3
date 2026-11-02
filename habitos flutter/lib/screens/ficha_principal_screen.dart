@@ -131,3 +131,4 @@ class _FichaPrincipalScreenState extends State<FichaPrincipalScreen> {
       ),
     );
   }
+}

@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../models/habito.dart';
 import '../services/preferencias_service.dart';
-import '../widgets/habito_tile.dart';
 import '../widgets/tarjeta_habito.dart';
 import '../widgets/progreso_card.dart';
 import 'habito_form_screen.dart';

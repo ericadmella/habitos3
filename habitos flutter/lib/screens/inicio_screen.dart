@@ -83,3 +83,4 @@ class _InicioScreenState extends State<InicioScreen> {
       ),
     );
   }
+}

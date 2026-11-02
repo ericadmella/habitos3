@@ -5,26 +5,12 @@ ACT02 · Persistencia de datos (I) · DAM2 – Accés a dades
 ## Cómo ejecutarlo
 
 ```bash
-flutter create --project-name habitos_app .   # genera android/, ios/, web/... (no sobrescribe lib/ ni pubspec.yaml si eliges mantenerlos)
 flutter pub get
 flutter run
 ```
 
-> Si partes de cero: `flutter create habitos_app`, copia `lib/` y `pubspec.yaml`, y ejecuta
-> `flutter pub add shared_preferences` y `flutter pub add intl`.
-
-## Actividad Diseño de Interfaces (Pantallas y navegación)
-
-Mismo proyecto, punto de entrada propio con datos en memoria:
-
-```bash
-flutter run -t lib/main_interfaces.dart
-```
-
-- `screens/inicio_screen.dart` → Bienvenida (nombre + objetivo, botón Comenzar → push con datos al constructor)
-- `screens/ficha_principal_screen.dart` → Saludo, objetivo y ficha del hábito "Beber agua" + Editar hábito + marcar/desmarcar
-- `screens/editar_habito_screen.dart` → TextField con el nombre, 3 colores en una Row (Azul/Verde/Naranja), Guardar (`pop(context, resultado)`) y Cancelar / flecha (`pop` → null)
-- `models/habito_ejemplo.dart` → modelo en memoria
+En Android Studio, abre la carpeta `habitos flutter` y ejecuta `lib/main.dart`.
+La aplicación tiene un único punto de entrada: `lib/main.dart`.
 
 ## Estructura
 
