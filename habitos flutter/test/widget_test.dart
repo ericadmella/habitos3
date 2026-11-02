@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habitos_app/main.dart';
 import 'package:habitos_app/models/habito.dart';
+import 'package:habitos_app/pantallas/estadisticas_page.dart';
 import 'package:habitos_app/servicios/base_datos_local.dart';
 import 'package:habitos_app/servicios/preferencias_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,6 +37,30 @@ void main() {
 
     expect(PreferenciasService.instance.onboardingHecho, isTrue);
     expect(find.text('Iniciar sesión'), findsOneWidget);
+  });
+
+  testWidgets('shows app launch count and last-open time in statistics',
+      (tester) async {
+    final preferencias = PreferenciasService.instance;
+    await preferencias.registrarApertura();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: EstadisticasPage(
+            estadisticas: const [],
+            aperturas: preferencias.contadorAperturas,
+            ultimaApertura: preferencias.ultimaApertura,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Aperturas de la app'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Última apertura'), findsOneWidget);
+    expect(find.text('Cuando registres hábitos, aquí verás sus rachas.'),
+        findsOneWidget);
   });
 
   testWidgets('registers an account and creates a personal habit',

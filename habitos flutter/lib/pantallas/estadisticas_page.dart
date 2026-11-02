@@ -1,29 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../widgets/dato_estadistica.dart';
 
 class EstadisticasPage extends StatelessWidget {
   final List<Map<String, Object?>> estadisticas;
+  final int aperturas;
+  final DateTime? ultimaApertura;
 
-  const EstadisticasPage({super.key, required this.estadisticas});
+  const EstadisticasPage({
+    super.key,
+    required this.estadisticas,
+    required this.aperturas,
+    required this.ultimaApertura,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (estadisticas.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'Cuando registres hábitos, aquí verás sus rachas y días completados.',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
+    final diasCompletados = estadisticas.fold<int>(
+      0,
+      (total, estadistica) => total + (estadistica['dias_completados']! as int),
+    );
+    final ultimaAperturaTexto = ultimaApertura == null
+        ? 'Nunca'
+        : DateFormat('d MMM yyyy, HH:mm', 'es_ES').format(ultimaApertura!);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Text(
+          'Resumen',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: DatoEstadistica(
+                etiqueta: 'Días completados',
+                valor: '$diasCompletados',
+                icono: Icons.calendar_month,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DatoEstadistica(
+                etiqueta: 'Aperturas de la app',
+                valor: '$aperturas',
+                icono: Icons.phone_android,
+              ),
+            ),
+          ],
+        ),
+        DatoEstadistica(
+          etiqueta: 'Última apertura',
+          valor: ultimaAperturaTexto,
+          icono: Icons.access_time,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Por hábito',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
+        if (estadisticas.isEmpty)
+          const Text('Cuando registres hábitos, aquí verás sus rachas.'),
         for (final estadistica in estadisticas)
           Card(
             margin: const EdgeInsets.only(bottom: 16),

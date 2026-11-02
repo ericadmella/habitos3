@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/habito.dart';
 import '../models/usuario.dart';
 import '../servicios/base_datos_local.dart';
+import '../servicios/preferencias_service.dart';
 import '../widgets/boton_principal.dart';
 import '../widgets/campo_texto_app.dart';
 import '../widgets/dato_estadistica.dart';
@@ -576,6 +577,11 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
   }
 
   Widget _vistaEstadisticas(BuildContext context) {
+    final preferencias = PreferenciasService.instance;
+    final ultimaApertura = preferencias.ultimaApertura;
+    final ultimaAperturaTexto = ultimaApertura == null
+        ? 'Nunca'
+        : DateFormat('d MMM yyyy, HH:mm', 'es_ES').format(ultimaApertura);
     final diasCompletados = _estadisticas.fold<int>(
       0,
       (total, estadistica) => total + (estadistica['dias_completados']! as int),
@@ -612,6 +618,25 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
           etiqueta: 'Días completados',
           valor: '$diasCompletados',
           icono: Icons.calendar_month,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: DatoEstadistica(
+                etiqueta: 'Aperturas de la app',
+                valor: '${preferencias.contadorAperturas}',
+                icono: Icons.phone_android,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DatoEstadistica(
+                etiqueta: 'Última apertura',
+                valor: ultimaAperturaTexto,
+                icono: Icons.access_time,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         for (final estadistica in _estadisticas)

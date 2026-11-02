@@ -144,7 +144,11 @@ class _PaginaHabitosState extends State<PaginaHabitos> {
               onDatosBorrados: widget.onDatosBorrados,
             )
           : estadisticas
-              ? EstadisticasPage(estadisticas: _estadisticas)
+              ? EstadisticasPage(
+                  estadisticas: _estadisticas,
+                  aperturas: _preferencias.contadorAperturas,
+                  ultimaApertura: _preferencias.ultimaApertura,
+                )
               : SafeArea(
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
