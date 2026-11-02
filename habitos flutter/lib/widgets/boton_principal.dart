@@ -4,12 +4,23 @@ import 'package:flutter/material.dart';
 class BotonPrincipal extends StatelessWidget {
   final String texto;
   final VoidCallback onPressed;
-  const BotonPrincipal({super.key, required this.texto, required this.onPressed});
+  final bool habilitado;
+
+  const BotonPrincipal({
+    super.key,
+    required this.texto,
+    required this.onPressed,
+    this.habilitado = true,
+  });
 
   @override
   Widget build(BuildContext context) => FilledButton(
-    onPressed: onPressed,
-    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14), textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-    child: Text(texto),
-  );
+        onPressed: habilitado ? onPressed : null,
+        style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            textStyle:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        child: Text(texto),
+      );
 }

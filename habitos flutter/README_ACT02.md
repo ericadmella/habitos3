@@ -1,23 +1,60 @@
-# HábitosApp — ACT02 Interfaces y componentes
+# HábitosApp — ACT02 Disseny d'interfícies
 
 ## Ejecutar
-- La aplicación se inicia siempre desde `lib/main.dart` (`flutter run`).
-- Este proyecto tiene un único punto de entrada para Android Studio.
 
-## Componentes reutilizables añadidos
-- `lib/widgets/campo_texto_app.dart`: campo de texto con etiqueta, controlador y opción `ocultar`.
-- `lib/widgets/boton_principal.dart`: botón con estilo común y callback `onPressed`.
-- `lib/widgets/tarjeta_habito.dart`: tarjeta con nombre, color, estado y callbacks para completar, editar y eliminar.
-- `lib/widgets/dato_estadistica.dart`: dato estadístico con etiqueta, valor, icono y color.
+Abre la carpeta `habitos flutter` en Android Studio y ejecuta `lib/main.dart`,
+o usa:
 
-Los componentes están disponibles en `lib/widgets/`. Las pantallas de demostración de login, registro y administración no son puntos de entrada independientes de la aplicación.
+```bash
+flutter pub get
+flutter run
+```
 
-## Importante: límites de esta entrega
-El proyecto utiliza `SharedPreferences` para guardar preferencias y hábitos locales, pero no contiene un modelo/servicio de cuentas de usuario ni roles persistidos. Las pantallas de login y registro son una maqueta de navegación: `admin/admin` abre el panel de administración, el registro valida campos pero no crea una cuenta persistente y las opciones de administración indican que falta conectar el servicio. No debe presentarse como autenticación segura ni como gestión real multiusuario. Para cumplir esa parte de forma funcional, hay que integrar el modelo y persistencia de usuarios de la actividad de Acceso a Datos.
+La aplicación tiene un solo punto de entrada. La cuenta local inicial de
+administración es `admin` / `admin`.
 
-## Estructura
-- `lib/main.dart`: entrada original y configuración global.
-- `lib/screens/`: pantallas.
+## Flujo y pantallas
+
+- `login_page.dart`: acceso de usuarios y administrador; enlaza con el registro.
+- `registro_page.dart`: guarda nombre, usuario, contraseña y fecha de creación.
+- `habitos_page.dart`: lista los hábitos propios, permite crearlos, editarlos,
+  eliminarlos, marcarlos como completados, consultar estadísticas y cerrar sesión.
+- `editar_habito_page.dart`: abre el mismo formulario para crear y editar.
+- `estadisticas_page.dart`: muestra la racha y los días completados de cada hábito.
+- `administracion_page.dart`: permite al administrador gestionar usuarios y
+  hábitos y consultar estadísticas globales.
+
+Las cuentas nuevas solo pueden consultar y modificar sus propios hábitos. El
+administrador puede gestionar las cuentas y los hábitos de la aplicación.
+
+## Componentes reutilizables
+
+Los cuatro componentes son `StatelessWidget` y reciben los datos y las acciones
+por constructor:
+
+- `CampoTextoApp`: etiqueta, controlador, opción para ocultar contraseña y
+  validación. Se usa en acceso, registro y formularios de hábitos.
+- `BotonPrincipal`: texto y acción del botón. Se comparte entre acceso, registro,
+  formularios y administración.
+- `TarjetaHabito`: nombre, color, estado e icono opcional; sus acciones completan,
+  editan y eliminan el hábito indicado.
+- `DatoEstadistica`: etiqueta, valor, icono y color opcional; se usa en estadísticas
+  individuales y globales.
+
+Los estilos comunes están centralizados en `lib/widgets/`; por eso un cambio en
+uno de estos widgets se refleja en todas las pantallas donde se reutiliza.
+
+## Carpetas principales
+
+- `lib/main.dart`: inicialización y navegación según el usuario autenticado.
+- `lib/models/`: modelos de hábitos y usuarios.
+- `lib/services/preferencias_service.dart`: persistencia local.
+- `lib/screens/`: pantallas de usuario y administración.
 - `lib/widgets/`: componentes reutilizables.
-- `lib/models/`: modelos de datos.
-- `lib/services/`: persistencia local.
+
+## Nota sobre el acceso
+
+La autenticación y los datos se guardan localmente con `SharedPreferences` para
+esta actividad. No es un sistema de autenticación seguro ni una solución para
+publicar con datos reales: las contraseñas y roles necesitan un servicio de
+autenticación y almacenamiento seguro en una aplicación de producción.

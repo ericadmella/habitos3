@@ -5,12 +5,14 @@
 /// Al leer se hace el camino inverso: jsonDecode -> Map -> [Habito.fromJson].
 class Habito {
   final String id;
+  String usuarioId;
   String nombre;
   int color; // valor ARGB, p. ej. 0xFFFF6B6B
   List<String> fechasCompletadas; // fechas en formato 'yyyy-MM-dd'
 
   Habito({
     required this.id,
+    this.usuarioId = '',
     required this.nombre,
     required this.color,
     List<String>? fechasCompletadas,
@@ -19,6 +21,7 @@ class Habito {
   /// Objeto -> Map<String, dynamic> (listo para jsonEncode).
   Map<String, dynamic> toJson() => {
         'id': id,
+        'usuarioId': usuarioId,
         'nombre': nombre,
         'color': color,
         'fechasCompletadas': fechasCompletadas,
@@ -28,17 +31,20 @@ class Habito {
   /// Se protege contra campos null por si el JSON viene incompleto.
   factory Habito.fromJson(Map<String, dynamic> json) => Habito(
         id: json['id'] as String,
+        usuarioId: json['usuarioId'] as String? ?? '',
         nombre: json['nombre'] as String? ?? '',
         color: json['color'] as int? ?? 0xFFFF7F50,
-        fechasCompletadas:
-            (json['fechasCompletadas'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
+        fechasCompletadas: (json['fechasCompletadas'] as List<dynamic>? ?? [])
+            .map((e) => e as String)
+            .toList(),
       );
 
   /// Clave de fecha 'yyyy-MM-dd' (sin hora) para comparar días.
   static String claveFecha(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-  bool completadoEn(DateTime dia) => fechasCompletadas.contains(claveFecha(dia));
+  bool completadoEn(DateTime dia) =>
+      fechasCompletadas.contains(claveFecha(dia));
 
   bool get hechoHoy => completadoEn(DateTime.now());
 

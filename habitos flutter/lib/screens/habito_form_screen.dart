@@ -19,8 +19,9 @@ class ResultadoFormulario {
 /// PrincipalScreen, que es quien llama al servicio.
 class HabitoFormScreen extends StatefulWidget {
   final Habito? habito;
+  final String usuarioId;
 
-  const HabitoFormScreen({super.key, this.habito});
+  const HabitoFormScreen({super.key, this.habito, this.usuarioId = ''});
 
   @override
   State<HabitoFormScreen> createState() => _HabitoFormScreenState();
@@ -28,8 +29,14 @@ class HabitoFormScreen extends StatefulWidget {
 
 class _HabitoFormScreenState extends State<HabitoFormScreen> {
   static const colores = [
-    0xFFFF6B6B, 0xFFFF9F43, 0xFFFDCB6E, 0xFF1DD1A1,
-    0xFF0ABDE3, 0xFF54A0FF, 0xFF5F27CD, 0xFFFF9FF3,
+    0xFFFF6B6B,
+    0xFFFF9F43,
+    0xFFFDCB6E,
+    0xFF1DD1A1,
+    0xFF0ABDE3,
+    0xFF54A0FF,
+    0xFF5F27CD,
+    0xFFFF9FF3,
   ];
 
   final _formKey = GlobalKey<FormState>();
@@ -61,7 +68,10 @@ class _HabitoFormScreenState extends State<HabitoFormScreen> {
       Navigator.pop(context, ResultadoFormulario(AccionFormulario.editar, h));
     } else {
       final h = Habito(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // identificador único
+        id: DateTime.now()
+            .millisecondsSinceEpoch
+            .toString(), // identificador único
+        usuarioId: widget.usuarioId,
         nombre: nombre,
         color: _color,
       );
@@ -74,15 +84,21 @@ class _HabitoFormScreenState extends State<HabitoFormScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('¿Borrar hábito?'),
-        content: Text('Se eliminará "${widget.habito!.nombre}" y todo su historial.'),
+        content: Text(
+            'Se eliminará "${widget.habito!.nombre}" y todo su historial.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Borrar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Borrar')),
         ],
       ),
     );
     if (ok == true && mounted) {
-      Navigator.pop(context, ResultadoFormulario(AccionFormulario.borrar, widget.habito!));
+      Navigator.pop(context,
+          ResultadoFormulario(AccionFormulario.borrar, widget.habito!));
     }
   }
 
@@ -93,7 +109,10 @@ class _HabitoFormScreenState extends State<HabitoFormScreen> {
         title: Text(_editando ? 'Editar hábito' : 'Nuevo hábito'),
         actions: [
           if (_editando)
-            IconButton(onPressed: _borrar, icon: const Icon(Icons.delete), tooltip: 'Borrar'),
+            IconButton(
+                onPressed: _borrar,
+                icon: const Icon(Icons.delete),
+                tooltip: 'Borrar'),
         ],
       ),
       body: Form(
@@ -104,7 +123,9 @@ class _HabitoFormScreenState extends State<HabitoFormScreen> {
             CampoTextoApp(
               etiqueta: 'Nombre (ej. Beber agua)',
               controller: _nombreCtrl,
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'El nombre es obligatorio' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'El nombre es obligatorio'
+                  : null,
             ),
             const SizedBox(height: 24),
             Text('Color', style: Theme.of(context).textTheme.titleMedium),

@@ -30,8 +30,8 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _guardando = true);
     // PERSISTENCIA: guarda String (nombre), int (objetivo) y bool (onboarding).
-    await PreferenciasService.instance
-        .guardarUsuario(_nombreCtrl.text.trim(), int.parse(_objetivoCtrl.text));
+    await PreferenciasService.instance.guardarPerfilOnboarding(
+        _nombreCtrl.text.trim(), int.parse(_objetivoCtrl.text));
     if (!mounted) return;
     widget.onTerminado();
   }
@@ -47,12 +47,15 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
             padding: const EdgeInsets.all(24),
             children: [
               const SizedBox(height: 32),
-              Icon(Icons.eco_rounded, size: 80, color: tema.colorScheme.primary),
+              Icon(Icons.eco_rounded,
+                  size: 80, color: tema.colorScheme.primary),
               const SizedBox(height: 16),
               Text('¡Bienvenido a HabitosApp!',
-                  style: tema.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  style: tema.textTheme.headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Cuéntanos un poco sobre ti para empezar.', style: tema.textTheme.bodyLarge),
+              Text('Cuéntanos un poco sobre ti para empezar.',
+                  style: tema.textTheme.bodyLarge),
               const SizedBox(height: 32),
               TextFormField(
                 controller: _nombreCtrl,
@@ -62,7 +65,9 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Escribe tu nombre' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Escribe tu nombre'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -75,17 +80,22 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
                 ),
                 validator: (v) {
                   final n = int.tryParse(v ?? '');
-                  if (n == null || n < 1 || n > 50) return 'Introduce un número entre 1 y 50';
+                  if (n == null || n < 1 || n > 50) {
+                    return 'Introduce un número entre 1 y 50';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 32),
               FilledButton(
                 onPressed: _guardando ? null : _empezar,
-                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+                style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56)),
                 child: _guardando
                     ? const SizedBox(
-                        width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2))
                     : const Text('Empezar'),
               ),
             ],
