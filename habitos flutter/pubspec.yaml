@@ -1,0 +1,30 @@
+name: habitos_app
+description: "HabitosApp - Registro de hábitos diarios con persistencia local mediante shared_preferences (ACT02 DAM2 - Accés a dades)."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+# Dependencias añadidas con:
+#   flutter pub add shared_preferences
+#   flutter pub add intl
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # Persistencia clave-valor local (NO es una base de datos).
+  shared_preferences: ^2.3.2
+  # intl: internacionalización y formateo de fechas/números según el idioma.
+  intl: ^0.20.2
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
