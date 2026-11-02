@@ -1,8 +1,8 @@
+import 'dart:convert';
+
 /// Modelo de un hábito.
 ///
-/// PERSISTENCIA: shared_preferences solo guarda tipos simples, así que cada
-/// Habito se convierte a Map con [toJson] y luego a String con jsonEncode.
-/// Al leer se hace el camino inverso: jsonDecode -> Map -> [Habito.fromJson].
+/// Las fechas completadas se almacenan como JSON en la tabla de hábitos.
 class Habito {
   final String id;
   String usuarioId;
@@ -27,8 +27,14 @@ class Habito {
         'fechasCompletadas': fechasCompletadas,
       };
 
-  /// Map (resultado de jsonDecode) -> objeto Habito.
-  /// Se protege contra campos null por si el JSON viene incompleto.
+  Map<String, Object?> toDatabase() => {
+        'id': id,
+        'usuario_id': usuarioId,
+        'nombre': nombre,
+        'color': color,
+        'fechas_completadas': jsonEncode(fechasCompletadas),
+      };
+
   factory Habito.fromJson(Map<String, dynamic> json) => Habito(
         id: json['id'] as String,
         usuarioId: json['usuarioId'] as String? ?? '',
@@ -37,6 +43,16 @@ class Habito {
         fechasCompletadas: (json['fechasCompletadas'] as List<dynamic>? ?? [])
             .map((e) => e as String)
             .toList(),
+      );
+
+  factory Habito.fromDatabase(Map<String, Object?> row) => Habito(
+        id: row['id'] as String,
+        usuarioId: row['usuario_id'] as String,
+        nombre: row['nombre'] as String,
+        color: row['color'] as int,
+        fechasCompletadas:
+            (jsonDecode(row['fechas_completadas'] as String) as List<dynamic>)
+                .cast<String>(),
       );
 
   /// Clave de fecha 'yyyy-MM-dd' (sin hora) para comparar días.

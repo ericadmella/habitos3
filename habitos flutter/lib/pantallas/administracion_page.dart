@@ -3,30 +3,38 @@ import 'package:intl/intl.dart';
 
 import '../models/habito.dart';
 import '../models/usuario.dart';
-import '../services/preferencias_service.dart';
+import '../servicios/base_datos_local.dart';
 import '../widgets/boton_principal.dart';
 import '../widgets/campo_texto_app.dart';
 import '../widgets/dato_estadistica.dart';
 import '../widgets/tarjeta_habito.dart';
+import 'ajustes_screen.dart';
 
-class AdministracionPage extends StatefulWidget {
+class PaginaAdministracion extends StatefulWidget {
   final Usuario administrador;
-  final VoidCallback onCerrarSesion;
+  final Future<void> Function() onCerrarSesion;
+  final ValueChanged<bool> onTemaCambiado;
+  final ValueChanged<double> onLetraCambiada;
+  final VoidCallback onDatosBorrados;
 
-  const AdministracionPage({
+  const PaginaAdministracion({
     super.key,
     required this.administrador,
     required this.onCerrarSesion,
+    required this.onTemaCambiado,
+    required this.onLetraCambiada,
+    required this.onDatosBorrados,
   });
 
   @override
-  State<AdministracionPage> createState() => _AdministracionPageState();
+  State<PaginaAdministracion> createState() => _PaginaAdministracionState();
 }
 
-class _AdministracionPageState extends State<AdministracionPage> {
-  final _preferencias = PreferenciasService.instance;
+class _PaginaAdministracionState extends State<PaginaAdministracion> {
+  final _baseDatos = BaseDatosLocal.instance;
   List<Usuario> _usuarios = [];
   List<Habito> _habitos = [];
+  List<Map<String, Object?>> _estadisticas = [];
   int _pestana = 0;
 
   @override
@@ -35,10 +43,15 @@ class _AdministracionPageState extends State<AdministracionPage> {
     _recargar();
   }
 
-  void _recargar() {
+  Future<void> _recargar() async {
+    final usuarios = await _baseDatos.cargarUsuarios();
+    final habitos = await _baseDatos.cargarHabitos();
+    final estadisticas = await _baseDatos.cargarEstadisticas();
+    if (!mounted) return;
     setState(() {
-      _usuarios = _preferencias.cargarUsuarios();
-      _habitos = _preferencias.cargarHabitos();
+      _usuarios = usuarios;
+      _habitos = habitos;
+      _estadisticas = estadisticas;
     });
   }
 
@@ -48,102 +61,143 @@ class _AdministracionPageState extends State<AdministracionPage> {
 
   Future<void> _editarUsuario([Usuario? usuario]) async {
     final nombre = TextEditingController(text: usuario?.nombre ?? '');
+    final apellidos = TextEditingController(text: usuario?.apellidos ?? '');
+    final email = TextEditingController(text: usuario?.email ?? '');
     final nombreUsuario =
         TextEditingController(text: usuario?.nombreUsuario ?? '');
     final contrasena = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    var esAdministrador = usuario?.esAdministrador ?? false;
     final datos = await showDialog<_DatosUsuario>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(usuario == null ? 'Crear usuario' : 'Editar usuario'),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CampoTextoApp(
-                  etiqueta: 'Nombre completo',
-                  controller: nombre,
-                  validator: (value) => value == null || value.trim().isEmpty
-                      ? 'Escribe el nombre.'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                CampoTextoApp(
-                  etiqueta: 'Usuario',
-                  controller: nombreUsuario,
-                  validator: (value) => value == null || value.trim().isEmpty
-                      ? 'Escribe el usuario.'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                CampoTextoApp(
-                  etiqueta: usuario == null
-                      ? 'Contraseña'
-                      : 'Nueva contraseña (opcional)',
-                  controller: contrasena,
-                  ocultar: true,
-                  validator: (value) =>
-                      usuario == null && (value == null || value.isEmpty)
-                          ? 'Escribe una contraseña.'
-                          : null,
-                ),
-                if (usuario != null) ...[
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(usuario == null ? 'Crear usuario' : 'Editar usuario'),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CampoTextoApp(
+                    etiqueta: 'Nombre',
+                    controller: nombre,
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Escribe el nombre.'
+                        : null,
+                  ),
                   const SizedBox(height: 12),
-                  Text(
-                    'Creada el ${DateFormat('dd/MM/yyyy').format(usuario.fechaCreacion)}',
+                  CampoTextoApp(
+                    etiqueta: 'Apellidos',
+                    controller: apellidos,
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Escribe los apellidos.'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CampoTextoApp(
+                    etiqueta: 'Correo electrónico',
+                    controller: email,
+                    teclado: TextInputType.emailAddress,
+                    validator: (value) => value == null ||
+                            !value.contains('@') ||
+                            !value.split('@').last.contains('.')
+                        ? 'Escribe un correo válido.'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CampoTextoApp(
+                    etiqueta: 'Usuario',
+                    controller: nombreUsuario,
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Escribe el usuario.'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  CampoTextoApp(
+                    etiqueta: usuario == null
+                        ? 'Contraseña'
+                        : 'Nueva contraseña (opcional)',
+                    controller: contrasena,
+                    ocultar: true,
+                    validator: (value) =>
+                        usuario == null && (value == null || value.isEmpty)
+                            ? 'Escribe una contraseña.'
+                            : null,
+                  ),
+                  if (usuario != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Creada el ${DateFormat('dd/MM/yyyy').format(usuario.fechaCreacion)}',
+                    ),
+                  ],
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Cuenta administradora'),
+                    value: esAdministrador,
+                    onChanged: (value) =>
+                        setDialogState(() => esAdministrador = value),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            BotonPrincipal(
+              texto: 'Guardar',
+              onPressed: () {
+                if (!formKey.currentState!.validate()) return;
+                Navigator.pop(
+                  context,
+                  _DatosUsuario(
+                    nombre: nombre.text.trim(),
+                    apellidos: apellidos.text.trim(),
+                    email: email.text.trim(),
+                    usuario: nombreUsuario.text.trim(),
+                    contrasena: contrasena.text,
+                    esAdministrador: esAdministrador,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          BotonPrincipal(
-            texto: 'Guardar',
-            onPressed: () {
-              if (!formKey.currentState!.validate()) return;
-              Navigator.pop(
-                context,
-                _DatosUsuario(
-                  nombre: nombre.text.trim(),
-                  usuario: nombreUsuario.text.trim(),
-                  contrasena: contrasena.text,
-                ),
-              );
-            },
-          ),
-        ],
       ),
     );
     nombre.dispose();
+    apellidos.dispose();
+    email.dispose();
     nombreUsuario.dispose();
     contrasena.dispose();
     if (datos == null) return;
 
     try {
       if (usuario == null) {
-        await _preferencias.registrarUsuario(
+        await _baseDatos.registrarUsuario(
           nombre: datos.nombre,
+          apellidos: datos.apellidos,
+          email: datos.email,
           nombreUsuario: datos.usuario,
           contrasena: datos.contrasena,
+          esAdministrador: datos.esAdministrador,
         );
       } else {
         final actualizado = Usuario(
           id: usuario.id,
           nombre: datos.nombre,
+          apellidos: datos.apellidos,
+          email: datos.email,
           nombreUsuario: datos.usuario.toLowerCase(),
           contrasena:
               datos.contrasena.isEmpty ? usuario.contrasena : datos.contrasena,
           fechaCreacion: usuario.fechaCreacion,
-          esAdministrador: usuario.esAdministrador,
+          esAdministrador: datos.esAdministrador,
         );
-        await _preferencias.guardarUsuario(actualizado);
+        await _baseDatos.guardarUsuario(actualizado);
       }
       if (mounted) _recargar();
     } on StateError catch (error) {
@@ -152,6 +206,10 @@ class _AdministracionPageState extends State<AdministracionPage> {
   }
 
   Future<void> _eliminarUsuario(Usuario usuario) async {
+    if (usuario.id == widget.administrador.id) {
+      _mensaje('No puedes eliminar la cuenta con la que has iniciado sesión.');
+      return;
+    }
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -173,7 +231,7 @@ class _AdministracionPageState extends State<AdministracionPage> {
     );
     if (confirmar != true) return;
     try {
-      await _preferencias.eliminarUsuario(usuario.id);
+      await _baseDatos.eliminarUsuario(usuario.id);
       if (mounted) _recargar();
     } on StateError catch (error) {
       if (mounted) _mensaje(error.message);
@@ -187,6 +245,9 @@ class _AdministracionPageState extends State<AdministracionPage> {
       return;
     }
     final nombre = TextEditingController(text: habito?.nombre ?? '');
+    final fechasCompletadas = TextEditingController(
+      text: habito?.fechasCompletadas.join(', ') ?? '',
+    );
     final formKey = GlobalKey<FormState>();
     var usuarioId = usuarios.any((u) => u.id == habito?.usuarioId)
         ? habito!.usuarioId
@@ -219,6 +280,17 @@ class _AdministracionPageState extends State<AdministracionPage> {
                     validator: (value) => value == null || value.trim().isEmpty
                         ? 'Escribe el nombre.'
                         : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: fechasCompletadas,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Fechas completadas',
+                      hintText: 'AAAA-MM-DD, separadas por comas',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: _validarFechas,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -279,6 +351,7 @@ class _AdministracionPageState extends State<AdministracionPage> {
                     nombre: nombre.text.trim(),
                     usuarioId: usuarioId,
                     color: color,
+                    fechasCompletadas: _parsearFechas(fechasCompletadas.text),
                   ),
                 );
               },
@@ -288,15 +361,16 @@ class _AdministracionPageState extends State<AdministracionPage> {
       ),
     );
     nombre.dispose();
+    fechasCompletadas.dispose();
     if (datos == null) return;
 
-    await _preferencias.guardarHabito(
+    await _baseDatos.guardarHabito(
       Habito(
         id: habito?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
         usuarioId: datos.usuarioId,
         nombre: datos.nombre,
         color: datos.color,
-        fechasCompletadas: habito?.fechasCompletadas,
+        fechasCompletadas: datos.fechasCompletadas,
       ),
     );
     if (mounted) _recargar();
@@ -321,15 +395,39 @@ class _AdministracionPageState extends State<AdministracionPage> {
       ),
     );
     if (confirmar == true) {
-      await _preferencias.eliminarHabito(habito.id);
+      await _baseDatos.eliminarHabito(habito.id);
       if (mounted) _recargar();
     }
   }
 
   Future<void> _alternarHabito(Habito habito) async {
     habito.alternarHoy();
-    await _preferencias.guardarHabito(habito);
+    await _baseDatos.guardarHabito(habito);
     if (mounted) _recargar();
+  }
+
+  String? _validarFechas(String? value) {
+    final texto = value ?? '';
+    final partes = texto.split(',').where((fecha) => fecha.trim().isNotEmpty);
+    final fechas = _parsearFechas(texto);
+    if (fechas.length != partes.length) {
+      return 'Usa fechas válidas con formato AAAA-MM-DD.';
+    }
+    if (fechas.toSet().length != fechas.length) {
+      return 'No repitas fechas.';
+    }
+    return null;
+  }
+
+  List<String> _parsearFechas(String texto) => texto
+      .split(',')
+      .map((fecha) => fecha.trim())
+      .where((fecha) => fecha.isNotEmpty && _fechaValida(fecha))
+      .toList();
+
+  bool _fechaValida(String fecha) {
+    final parsed = DateTime.tryParse(fecha);
+    return parsed != null && Habito.claveFecha(parsed) == fecha;
   }
 
   @override
@@ -347,7 +445,8 @@ class _AdministracionPageState extends State<AdministracionPage> {
     final titulo = switch (_pestana) {
       0 => 'Gestión de usuarios',
       1 => 'Gestión de hábitos',
-      _ => 'Estadísticas globales',
+      2 => 'Estadísticas globales',
+      _ => 'Ajustes',
     };
 
     return Scaffold(
@@ -356,7 +455,7 @@ class _AdministracionPageState extends State<AdministracionPage> {
         actions: [
           IconButton(
             tooltip: 'Cerrar sesión',
-            onPressed: widget.onCerrarSesion,
+            onPressed: () async => widget.onCerrarSesion(),
             icon: const Icon(Icons.logout),
           ),
         ],
@@ -365,10 +464,15 @@ class _AdministracionPageState extends State<AdministracionPage> {
         child: switch (_pestana) {
           0 => _vistaUsuarios(context),
           1 => _vistaHabitos(context),
-          _ => _vistaEstadisticas(context),
+          2 => _vistaEstadisticas(context),
+          _ => PantallaAjustes(
+              onTemaCambiado: widget.onTemaCambiado,
+              onLetraCambiada: widget.onLetraCambiada,
+              onDatosBorrados: widget.onDatosBorrados,
+            ),
         },
       ),
-      floatingActionButton: _pestana == 2
+      floatingActionButton: _pestana >= 2
           ? null
           : FloatingActionButton(
               tooltip: _pestana == 0 ? 'Crear usuario' : 'Crear hábito',
@@ -393,6 +497,10 @@ class _AdministracionPageState extends State<AdministracionPage> {
             icon: Icon(Icons.bar_chart),
             label: 'Estadísticas',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            label: 'Ajustes',
+          ),
         ],
       ),
     );
@@ -411,12 +519,22 @@ class _AdministracionPageState extends State<AdministracionPage> {
                     ? Icons.admin_panel_settings
                     : Icons.person,
               ),
-              title: Text(usuario.nombre),
+              title: Text('${usuario.nombre} ${usuario.apellidos}'.trim()),
               subtitle: Text(
-                '@${usuario.nombreUsuario} · ${DateFormat('dd/MM/yyyy').format(usuario.fechaCreacion)}',
+                '${usuario.email} · @${usuario.nombreUsuario} · ${usuario.esAdministrador ? 'Administrador' : 'Usuario'} · ${DateFormat('dd/MM/yyyy').format(usuario.fechaCreacion)}',
               ),
               trailing: usuario.esAdministrador
-                  ? const Chip(label: Text('Admin'))
+                  ? PopupMenuButton<String>(
+                      onSelected: (accion) {
+                        if (accion == 'editar') _editarUsuario(usuario);
+                        if (accion == 'eliminar') _eliminarUsuario(usuario);
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(value: 'editar', child: Text('Editar')),
+                        PopupMenuItem(
+                            value: 'eliminar', child: Text('Eliminar')),
+                      ],
+                    )
                   : PopupMenuButton<String>(
                       onSelected: (accion) {
                         if (accion == 'editar') _editarUsuario(usuario);
@@ -458,8 +576,10 @@ class _AdministracionPageState extends State<AdministracionPage> {
   }
 
   Widget _vistaEstadisticas(BuildContext context) {
-    final diasCompletados =
-        _habitos.fold<int>(0, (total, habito) => total + habito.totalDias);
+    final diasCompletados = _estadisticas.fold<int>(
+      0,
+      (total, estadistica) => total + (estadistica['dias_completados']! as int),
+    );
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -494,6 +614,15 @@ class _AdministracionPageState extends State<AdministracionPage> {
           icono: Icons.calendar_month,
         ),
         const SizedBox(height: 16),
+        for (final estadistica in _estadisticas)
+          Card(
+            child: ListTile(
+              title: Text(estadistica['nombre']! as String),
+              subtitle: Text(
+                '${estadistica['usuario']} · Racha: ${estadistica['racha_actual']} · Días: ${estadistica['dias_completados']}',
+              ),
+            ),
+          ),
         for (final usuario in _usuarios.where((u) => !u.esAdministrador))
           Card(
             child: ListTile(
@@ -517,13 +646,19 @@ class _AdministracionPageState extends State<AdministracionPage> {
 
 class _DatosUsuario {
   final String nombre;
+  final String apellidos;
+  final String email;
   final String usuario;
   final String contrasena;
+  final bool esAdministrador;
 
   const _DatosUsuario({
     required this.nombre,
+    required this.apellidos,
+    required this.email,
     required this.usuario,
     required this.contrasena,
+    required this.esAdministrador,
   });
 }
 
@@ -531,10 +666,12 @@ class _DatosHabito {
   final String nombre;
   final String usuarioId;
   final int color;
+  final List<String> fechasCompletadas;
 
   const _DatosHabito({
     required this.nombre,
     required this.usuarioId,
     required this.color,
+    required this.fechasCompletadas,
   });
 }

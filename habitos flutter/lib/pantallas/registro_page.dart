@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../services/preferencias_service.dart';
+import '../servicios/base_datos_local.dart';
 import '../widgets/boton_principal.dart';
 import '../widgets/campo_texto_app.dart';
 
-class RegistroPage extends StatefulWidget {
-  const RegistroPage({super.key});
+class PaginaRegistro extends StatefulWidget {
+  const PaginaRegistro({super.key});
 
   @override
-  State<RegistroPage> createState() => _RegistroPageState();
+  State<PaginaRegistro> createState() => _PaginaRegistroState();
 }
 
-class _RegistroPageState extends State<RegistroPage> {
+class _PaginaRegistroState extends State<PaginaRegistro> {
   final _formKey = GlobalKey<FormState>();
   final _nombre = TextEditingController();
+  final _apellidos = TextEditingController();
+  final _email = TextEditingController();
   final _usuario = TextEditingController();
   final _contrasena = TextEditingController();
   String? _error;
@@ -22,6 +24,8 @@ class _RegistroPageState extends State<RegistroPage> {
   @override
   void dispose() {
     _nombre.dispose();
+    _apellidos.dispose();
+    _email.dispose();
     _usuario.dispose();
     _contrasena.dispose();
     super.dispose();
@@ -34,8 +38,10 @@ class _RegistroPageState extends State<RegistroPage> {
       _error = null;
     });
     try {
-      await PreferenciasService.instance.registrarUsuario(
+      await BaseDatosLocal.instance.registrarUsuario(
         nombre: _nombre.text,
+        apellidos: _apellidos.text,
+        email: _email.text,
         nombreUsuario: _usuario.text,
         contrasena: _contrasena.text,
       );
@@ -60,10 +66,29 @@ class _RegistroPageState extends State<RegistroPage> {
             padding: const EdgeInsets.all(24),
             children: [
               CampoTextoApp(
-                etiqueta: 'Nombre completo',
+                etiqueta: 'Nombre',
                 controller: _nombre,
                 validator: (value) => value == null || value.trim().isEmpty
                     ? 'Escribe tu nombre.'
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              CampoTextoApp(
+                etiqueta: 'Apellidos',
+                controller: _apellidos,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Escribe tus apellidos.'
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              CampoTextoApp(
+                etiqueta: 'Correo electrónico',
+                controller: _email,
+                teclado: TextInputType.emailAddress,
+                validator: (value) => value == null ||
+                        !value.contains('@') ||
+                        !value.split('@').last.contains('.')
+                    ? 'Escribe un correo electrónico válido.'
                     : null,
               ),
               const SizedBox(height: 16),

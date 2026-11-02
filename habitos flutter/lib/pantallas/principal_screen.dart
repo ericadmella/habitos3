@@ -4,39 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/habito.dart';
-import '../services/preferencias_service.dart';
+import '../servicios/base_datos_local.dart';
+import '../servicios/preferencias_service.dart';
 import '../widgets/tarjeta_habito.dart';
 import '../widgets/progreso_card.dart';
 import 'habito_form_screen.dart';
 
 /// Pantalla principal: saludo, progreso del día y lista de hábitos.
 /// StatefulWidget: la lista cambia al marcar/crear/editar/borrar.
-class PrincipalScreen extends StatefulWidget {
-  const PrincipalScreen({super.key});
+class PantallaPrincipal extends StatefulWidget {
+  const PantallaPrincipal({super.key});
 
   @override
-  State<PrincipalScreen> createState() => _PrincipalScreenState();
+  State<PantallaPrincipal> createState() => _PantallaPrincipalState();
 }
 
-class _PrincipalScreenState extends State<PrincipalScreen> {
-  final _prefs = PreferenciasService.instance;
+class _PantallaPrincipalState extends State<PantallaPrincipal> {
+  final _baseDatos = BaseDatosLocal.instance;
+  final _preferencias = PreferenciasService.instance;
   List<Habito> _habitos = [];
 
   @override
   void initState() {
     super.initState();
     // PERSISTENCIA: recupera la List<String> y la convierte a objetos Habito.
-    _habitos = _prefs.cargarHabitos();
+    _recargar();
   }
 
-  Future<void> _guardar() async {
-    // PERSISTENCIA: cada cambio se guarda inmediatamente (jsonEncode de cada hábito).
-    await _prefs.guardarHabitos(_habitos);
+  Future<void> _recargar() async {
+    final habitos = await _baseDatos.cargarHabitos();
+    if (!mounted) return;
+    setState(() => _habitos = habitos);
   }
 
   Future<void> _alternar(Habito h) async {
     setState(() => h.alternarHoy());
-    await _guardar();
+    await _baseDatos.guardarHabito(h);
   }
 
   Future<void> _eliminar(Habito habito) async {
@@ -44,16 +47,21 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar hábito'),
-        content: Text('¿Quieres eliminar "${habito.nombre}"? Esta acción también elimina su historial.'),
+        content: Text(
+            '¿Quieres eliminar "${habito.nombre}"? Esta acción también elimina su historial.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Eliminar')),
         ],
       ),
     );
     if (confirmado == true && mounted) {
       setState(() => _habitos.removeWhere((h) => h.id == habito.id));
-      await _guardar();
+      await _baseDatos.eliminarHabito(habito.id);
     }
   }
 
@@ -61,7 +69,8 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
   Future<void> _abrirFormulario([Habito? habito]) async {
     final resultado = await Navigator.push<ResultadoFormulario>(
       context,
-      MaterialPageRoute(builder: (_) => HabitoFormScreen(habito: habito)),
+      MaterialPageRoute(
+          builder: (_) => PantallaFormularioHabito(habito: habito)),
     );
     if (resultado == null) return;
     setState(() {
@@ -75,16 +84,22 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
           _habitos.removeWhere((h) => h.id == resultado.habito.id);
       }
     });
-    await _guardar();
+    if (resultado.accion == AccionFormulario.borrar) {
+      await _baseDatos.eliminarHabito(resultado.habito.id);
+    } else {
+      await _baseDatos.guardarHabito(resultado.habito);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
     final hechos = _habitos.where((h) => h.hechoHoy).length;
-    final ocultar = _prefs.ocultarCompletados;
-    final visibles = ocultar ? _habitos.where((h) => !h.hechoHoy).toList() : _habitos;
-    final fecha = DateFormat("EEEE, d 'de' MMMM", 'es_ES').format(DateTime.now());
+    final ocultar = _preferencias.ocultarCompletados;
+    final visibles =
+        ocultar ? _habitos.where((h) => !h.hechoHoy).toList() : _habitos;
+    final fecha =
+        DateFormat("EEEE, d 'de' MMMM", 'es_ES').format(DateTime.now());
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -97,10 +112,12 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
           children: [
             Text(fecha, style: tema.textTheme.bodyMedium),
-            Text('Hola, ${_prefs.nombreUsuario}',
-                style: tema.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Hola, ${_preferencias.nombreUsuario}',
+                style: tema.textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            ProgresoCard(hechos: hechos, objetivo: _prefs.objetivoDiario),
+            ProgresoCard(
+                hechos: hechos, objetivo: _preferencias.objetivoDiario),
             const SizedBox(height: 16),
             if (visibles.isEmpty)
               Padding(
@@ -109,7 +126,10 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
                   Icon(_habitos.isEmpty ? Icons.eco : Icons.emoji_events,
                       size: 56, color: tema.colorScheme.secondary),
                   const SizedBox(height: 8),
-                  Text(_habitos.isEmpty ? '¡Empieza tu primer hábito!' : '¡Todo hecho por hoy!',
+                  Text(
+                      _habitos.isEmpty
+                          ? '¡Empieza tu primer hábito!'
+                          : '¡Todo hecho por hoy!',
                       style: tema.textTheme.titleMedium),
                 ]),
               ),

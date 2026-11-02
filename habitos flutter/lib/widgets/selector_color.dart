@@ -28,11 +28,15 @@ class SelectorColor extends StatelessWidget {
             onTap: () => onSeleccionado(c),
             child: CircleAvatar(
               radius: 26,
-              backgroundColor: activo ? Theme.of(context).colorScheme.onSurface : Colors.transparent,
+              backgroundColor: activo
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Colors.transparent,
               child: CircleAvatar(
                 radius: 22,
                 backgroundColor: Color(c),
-                child: activo ? const Icon(Icons.check, color: Colors.white) : null,
+                child: activo
+                    ? const Icon(Icons.check, color: Colors.white)
+                    : null,
               ),
             ),
           );

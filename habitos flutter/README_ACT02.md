@@ -16,7 +16,8 @@ administración es `admin` / `admin`.
 ## Flujo y pantallas
 
 - `login_page.dart`: acceso de usuarios y administrador; enlaza con el registro.
-- `registro_page.dart`: guarda nombre, usuario, contraseña y fecha de creación.
+- `registro_page.dart`: guarda nombre, apellidos, correo, usuario, contraseña,
+  rol y fecha de creación.
 - `habitos_page.dart`: lista los hábitos propios, permite crearlos, editarlos,
   eliminarlos, marcarlos como completados, consultar estadísticas y cerrar sesión.
 - `editar_habito_page.dart`: abre el mismo formulario para crear y editar.
@@ -48,13 +49,21 @@ uno de estos widgets se refleja en todas las pantallas donde se reutiliza.
 
 - `lib/main.dart`: inicialización y navegación según el usuario autenticado.
 - `lib/models/`: modelos de hábitos y usuarios.
-- `lib/services/preferencias_service.dart`: persistencia local.
-- `lib/screens/`: pantallas de usuario y administración.
+- `lib/servicios/base_datos_local.dart`: base de datos SQLite y operaciones CRUD.
+- `lib/servicios/preferencias_service.dart`: ajustes y preferencias de la app.
+- `lib/pantallas/`: pantallas de usuario y administración.
 - `lib/widgets/`: componentes reutilizables.
 
-## Nota sobre el acceso
+## Base de datos local
 
-La autenticación y los datos se guardan localmente con `SharedPreferences` para
-esta actividad. No es un sistema de autenticación seguro ni una solución para
-publicar con datos reales: las contraseñas y roles necesitan un servicio de
-autenticación y almacenamiento seguro en una aplicación de producción.
+SQLite crea las tablas `usuarios`, `habitos` y `estadisticas`. Las fechas
+completadas de cada hábito se guardan como JSON dentro de su registro, y la
+tabla de estadísticas mantiene la racha actual y los días completados.
+El administrador puede editar esas fechas desde la gestión de hábitos; las
+estadísticas se recalculan al guardar y se eliminan al borrar el hábito asociado.
+`SharedPreferences` se reserva para los ajustes y preferencias de la aplicación.
+Los datos de usuarios y hábitos de versiones anteriores se migran al primer
+inicio con SQLite.
+
+La autenticación es local para esta actividad; las contraseñas se guardan sin
+cifrar y no debe usarse con datos reales en producción.

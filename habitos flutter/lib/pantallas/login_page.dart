@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../models/usuario.dart';
-import '../services/preferencias_service.dart';
+import '../servicios/base_datos_local.dart';
 import '../widgets/boton_principal.dart';
 import '../widgets/campo_texto_app.dart';
 import 'registro_page.dart';
 
-class LoginPage extends StatefulWidget {
-  final ValueChanged<Usuario> onLogin;
+class PaginaLogin extends StatefulWidget {
+  final Future<void> Function(Usuario) onLogin;
 
-  const LoginPage({super.key, required this.onLogin});
+  const PaginaLogin({super.key, required this.onLogin});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<PaginaLogin> createState() => _PaginaLoginState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _PaginaLoginState extends State<PaginaLogin> {
   final _usuario = TextEditingController();
   final _contrasena = TextEditingController();
   String? _error;
@@ -27,24 +27,25 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _entrar() {
+  Future<void> _entrar() async {
     if (_usuario.text.trim().isEmpty || _contrasena.text.isEmpty) {
       setState(() => _error = 'Completa el usuario y la contraseña.');
       return;
     }
-    final cuenta = PreferenciasService.instance
+    final cuenta = await BaseDatosLocal.instance
         .autenticar(_usuario.text, _contrasena.text);
+    if (!mounted) return;
     if (cuenta == null) {
       setState(() => _error = 'El usuario o la contraseña no son correctos.');
       return;
     }
-    widget.onLogin(cuenta);
+    await widget.onLogin(cuenta);
   }
 
   Future<void> _abrirRegistro() async {
     final registrado = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => const RegistroPage()),
+      MaterialPageRoute(builder: (_) => const PaginaRegistro()),
     );
     if (registrado == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

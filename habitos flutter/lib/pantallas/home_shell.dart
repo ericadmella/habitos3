@@ -6,12 +6,12 @@ import 'principal_screen.dart';
 
 /// Contenedor con barra de navegación inferior entre las 3 pantallas principales.
 /// StatefulWidget: guarda qué pestaña está seleccionada.
-class HomeShell extends StatefulWidget {
+class ShellPrincipal extends StatefulWidget {
   final ValueChanged<bool> onTemaCambiado;
   final ValueChanged<double> onLetraCambiada;
   final VoidCallback onDatosBorrados;
 
-  const HomeShell({
+  const ShellPrincipal({
     super.key,
     required this.onTemaCambiado,
     required this.onLetraCambiada,
@@ -19,10 +19,10 @@ class HomeShell extends StatefulWidget {
   });
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  State<ShellPrincipal> createState() => _ShellPrincipalState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _ShellPrincipalState extends State<ShellPrincipal> {
   int _indice = 0;
 
   @override
@@ -30,9 +30,9 @@ class _HomeShellState extends State<HomeShell> {
     // Cada pestaña se construye de nuevo al seleccionarla, así lee
     // siempre los datos más recientes guardados en preferencias.
     final paginas = [
-      const PrincipalScreen(),
-      const EstadisticasScreen(),
-      AjustesScreen(
+      const PantallaPrincipal(),
+      const PantallaEstadisticas(),
+      PantallaAjustes(
         onTemaCambiado: widget.onTemaCambiado,
         onLetraCambiada: widget.onLetraCambiada,
         onDatosBorrados: widget.onDatosBorrados,
@@ -45,9 +45,18 @@ class _HomeShellState extends State<HomeShell> {
         selectedIndex: _indice,
         onDestinationSelected: (i) => setState(() => _indice = i),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.check_circle_outline), selectedIcon: Icon(Icons.check_circle), label: 'Hoy'),
-          NavigationDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: 'Estadísticas'),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Ajustes'),
+          NavigationDestination(
+              icon: Icon(Icons.check_circle_outline),
+              selectedIcon: Icon(Icons.check_circle),
+              label: 'Hoy'),
+          NavigationDestination(
+              icon: Icon(Icons.bar_chart_outlined),
+              selectedIcon: Icon(Icons.bar_chart),
+              label: 'Estadísticas'),
+          NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings),
+              label: 'Ajustes'),
         ],
       ),
     );

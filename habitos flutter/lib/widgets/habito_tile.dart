@@ -9,7 +9,11 @@ class HabitoTile extends StatelessWidget {
   final VoidCallback onToggle;
   final VoidCallback onTap;
 
-  const HabitoTile({super.key, required this.habito, required this.onToggle, required this.onTap});
+  const HabitoTile(
+      {super.key,
+      required this.habito,
+      required this.onToggle,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +22,12 @@ class HabitoTile extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Container(
-        decoration: BoxDecoration(border: Border(left: BorderSide(color: color, width: 8))),
+        decoration: BoxDecoration(
+            border: Border(left: BorderSide(color: color, width: 8))),
         child: ListTile(
           onTap: onTap,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           title: Text(
             habito.nombre,
             style: TextStyle(

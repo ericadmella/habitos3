@@ -17,7 +17,8 @@ class ProgresoCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('$hechos de $objetivo hábitos',
-              style: tema.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              style: tema.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),

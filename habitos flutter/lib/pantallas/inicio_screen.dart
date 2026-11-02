@@ -6,14 +6,14 @@ import '../widgets/boton_principal.dart';
 
 /// Pantalla de bienvenida (Diseño de Interfaces).
 /// Pide nombre y objetivo diario y los pasa al constructor de la principal.
-class InicioScreen extends StatefulWidget {
-  const InicioScreen({super.key});
+class PantallaInicio extends StatefulWidget {
+  const PantallaInicio({super.key});
 
   @override
-  State<InicioScreen> createState() => _InicioScreenState();
+  State<PantallaInicio> createState() => _PantallaInicioState();
 }
 
-class _InicioScreenState extends State<InicioScreen> {
+class _PantallaInicioState extends State<PantallaInicio> {
   // Un TextEditingController por campo, creados FUERA de build.
   final TextEditingController _nombreCtrl = TextEditingController();
   final TextEditingController _objetivoCtrl = TextEditingController();
@@ -39,7 +39,8 @@ class _InicioScreenState extends State<InicioScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FichaPrincipalScreen(nombre: nombre, objetivo: objetivo),
+        builder: (context) =>
+            PantallaFichaPrincipal(nombre: nombre, objetivo: objetivo),
       ),
     );
   }
@@ -52,27 +53,36 @@ class _InicioScreenState extends State<InicioScreen> {
       // SingleChildScrollView: evita que el contenido quede cortado con el teclado.
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Center( // NOU: centra el contenido en pantallas anchas (ordenador)
-          child: ConstrainedBox( // NOU: limita el ancho máximo
+        child: Center(
+          // NOU: centra el contenido en pantallas anchas (ordenador)
+          child: ConstrainedBox(
+            // NOU: limita el ancho máximo
             constraints: const BoxConstraints(maxWidth: 600), // NOU
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16),
-                Icon(Icons.eco_rounded, size: 72, color: tema.colorScheme.primary),
+                Icon(Icons.eco_rounded,
+                    size: 72, color: tema.colorScheme.primary),
                 const SizedBox(height: 16),
                 Text(
-                  'HabitosApp',
+                  'HábitosApp',
                   textAlign: TextAlign.center,
-                  style: tema.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: tema.textTheme.headlineLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 32),
-                CampoTextoApp(etiqueta: 'Nombre del usuario', controller: _nombreCtrl),
+                CampoTextoApp(
+                    etiqueta: 'Nombre del usuario', controller: _nombreCtrl),
                 const SizedBox(height: 16),
-                CampoTextoApp(etiqueta: 'Objetivo diario de hábitos', controller: _objetivoCtrl, teclado: TextInputType.number),
+                CampoTextoApp(
+                    etiqueta: 'Objetivo diario de hábitos',
+                    controller: _objetivoCtrl,
+                    teclado: TextInputType.number),
                 if (_error != null) ...[
                   const SizedBox(height: 8),
-                  Text(_error!, style: TextStyle(color: tema.colorScheme.error)),
+                  Text(_error!,
+                      style: TextStyle(color: tema.colorScheme.error)),
                 ],
                 const SizedBox(height: 24),
                 BotonPrincipal(texto: 'Comenzar', onPressed: _comenzar),

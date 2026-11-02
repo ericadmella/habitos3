@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../services/preferencias_service.dart';
+import '../servicios/base_datos_local.dart';
+import '../servicios/preferencias_service.dart';
 
 /// Ajustes: tema (bool), tamaño de letra (double), ocultar completados (bool)
 /// y borrar todos los datos.
-class AjustesScreen extends StatefulWidget {
+class PantallaAjustes extends StatefulWidget {
   final ValueChanged<bool> onTemaCambiado;
   final ValueChanged<double> onLetraCambiada;
   final VoidCallback onDatosBorrados;
 
-  const AjustesScreen({
+  const PantallaAjustes({
     super.key,
     required this.onTemaCambiado,
     required this.onLetraCambiada,
@@ -17,10 +18,10 @@ class AjustesScreen extends StatefulWidget {
   });
 
   @override
-  State<AjustesScreen> createState() => _AjustesScreenState();
+  State<PantallaAjustes> createState() => _PantallaAjustesState();
 }
 
-class _AjustesScreenState extends State<AjustesScreen> {
+class _PantallaAjustesState extends State<PantallaAjustes> {
   final _prefs = PreferenciasService.instance;
   late bool _oscuro;
   late double _letra;
@@ -41,15 +42,20 @@ class _AjustesScreenState extends State<AjustesScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('¿Borrar todos los datos?'),
         content: const Text(
-            'Se eliminarán tu nombre, hábitos, estadísticas y ajustes. La app quedará como recién instalada.'),
+            'Se eliminarán todas las cuentas, hábitos, estadísticas y ajustes. La app volverá a la pantalla de bienvenida.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Borrar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Borrar')),
         ],
       ),
     );
     if (ok != true) return;
     // PERSISTENCIA: prefs.clear() elimina todas las claves.
+    await BaseDatosLocal.instance.borrarTodo();
     await _prefs.borrarTodo();
     widget.onDatosBorrados(); // vuelve a mostrar la bienvenida
   }
@@ -62,7 +68,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           Text('Ajustes',
-              style: tema.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+              style: tema.textTheme.headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Card(
             child: Column(children: [
@@ -89,22 +96,25 @@ class _AjustesScreenState extends State<AjustesScreen> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Tamaño de letra: ${(_letra * 100).round()}%', style: tema.textTheme.titleMedium),
-                Slider(
-                  value: _letra,
-                  min: 0.8,
-                  max: 1.4,
-                  divisions: 12,
-                  label: '${(_letra * 100).round()}%',
-                  onChanged: (v) => setState(() => _letra = v),
-                  // Se guarda al soltar para no escribir en disco en cada movimiento.
-                  onChangeEnd: (v) async {
-                    await _prefs.setTamanoLetra(v); // double
-                    widget.onLetraCambiada(v);
-                  },
-                ),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Tamaño de letra: ${(_letra * 100).round()}%',
+                        style: tema.textTheme.titleMedium),
+                    Slider(
+                      value: _letra,
+                      min: 0.8,
+                      max: 1.4,
+                      divisions: 12,
+                      label: '${(_letra * 100).round()}%',
+                      onChanged: (v) => setState(() => _letra = v),
+                      // Se guarda al soltar para no escribir en disco en cada movimiento.
+                      onChangeEnd: (v) async {
+                        await _prefs.setTamanoLetra(v); // double
+                        widget.onLetraCambiada(v);
+                      },
+                    ),
+                  ]),
             ),
           ),
           const SizedBox(height: 12),
@@ -112,7 +122,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
             child: ListTile(
               leading: const Icon(Icons.person),
               title: Text(_prefs.nombreUsuario),
-              subtitle: Text('Objetivo: ${_prefs.objetivoDiario} hábitos al día'),
+              subtitle:
+                  Text('Objetivo: ${_prefs.objetivoDiario} hábitos al día'),
             ),
           ),
           const SizedBox(height: 24),

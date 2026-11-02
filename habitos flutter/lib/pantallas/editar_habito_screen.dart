@@ -4,16 +4,16 @@ import '../models/habito_ejemplo.dart';
 
 /// Editar hábito (Diseño de Interfaces).
 /// Guardar -> Navigator.pop(context, resultado). Cancelar / flecha -> pop sin resultado (null).
-class EditarHabitoScreen extends StatefulWidget {
+class PantallaEditarHabito extends StatefulWidget {
   final HabitoEjemplo habito;
 
-  const EditarHabitoScreen({super.key, required this.habito});
+  const PantallaEditarHabito({super.key, required this.habito});
 
   @override
-  State<EditarHabitoScreen> createState() => _EditarHabitoScreenState();
+  State<PantallaEditarHabito> createState() => _PantallaEditarHabitoState();
 }
 
-class _EditarHabitoScreenState extends State<EditarHabitoScreen> {
+class _PantallaEditarHabitoState extends State<PantallaEditarHabito> {
   // Controlador creado fuera de build e inicializado con el nombre recibido.
   late final TextEditingController _nombreCtrl;
   late ColorHabito _colorSeleccionado;
@@ -53,12 +53,15 @@ class _EditarHabitoScreenState extends State<EditarHabitoScreen> {
           backgroundColor: c.color,
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(52),
-          side: seleccionado ? const BorderSide(color: Colors.black, width: 3) : BorderSide.none,
+          side: seleccionado
+              ? const BorderSide(color: Colors.black, width: 3)
+              : BorderSide.none,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (seleccionado) const Icon(Icons.check, size: 18, color: Colors.white),
+            if (seleccionado)
+              const Icon(Icons.check, size: 18, color: Colors.white),
             if (seleccionado) const SizedBox(width: 4),
             Text(c.nombre),
           ],
@@ -75,8 +78,10 @@ class _EditarHabitoScreenState extends State<EditarHabitoScreen> {
       appBar: AppBar(title: const Text('Editar hábito')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Center( // NOU: centra el contenido en pantallas anchas (ordenador)
-          child: ConstrainedBox( // NOU: limita el ancho máximo
+        child: Center(
+          // NOU: centra el contenido en pantallas anchas (ordenador)
+          child: ConstrainedBox(
+            // NOU: limita el ancho máximo
             constraints: const BoxConstraints(maxWidth: 600), // NOU
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,17 +109,21 @@ class _EditarHabitoScreenState extends State<EditarHabitoScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'Seleccionado: ${_colorSeleccionado.nombre}',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: _colorSeleccionado.color),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _colorSeleccionado.color),
                 ),
                 const SizedBox(height: 32),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(onPressed: _cancelar, child: const Text('Cancelar')),
+                      child: OutlinedButton(
+                          onPressed: _cancelar, child: const Text('Cancelar')),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                      child: ElevatedButton(
+                          onPressed: _guardar, child: const Text('Guardar')),
                     ),
                   ],
                 ),

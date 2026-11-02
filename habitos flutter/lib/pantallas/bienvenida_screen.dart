@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../services/preferencias_service.dart';
+import '../servicios/preferencias_service.dart';
 
 /// Pantalla de bienvenida (solo la primera vez).
 /// StatefulWidget: controla los TextField y los mensajes de error.
-class BienvenidaScreen extends StatefulWidget {
+class PantallaBienvenida extends StatefulWidget {
   final VoidCallback onTerminado;
 
-  const BienvenidaScreen({super.key, required this.onTerminado});
+  const PantallaBienvenida({super.key, required this.onTerminado});
 
   @override
-  State<BienvenidaScreen> createState() => _BienvenidaScreenState();
+  State<PantallaBienvenida> createState() => _PantallaBienvenidaState();
 }
 
-class _BienvenidaScreenState extends State<BienvenidaScreen> {
+class _PantallaBienvenidaState extends State<PantallaBienvenida> {
   final _formKey = GlobalKey<FormState>();
   final _nombreCtrl = TextEditingController();
   final _objetivoCtrl = TextEditingController(text: '3');
@@ -50,7 +50,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
               Icon(Icons.eco_rounded,
                   size: 80, color: tema.colorScheme.primary),
               const SizedBox(height: 16),
-              Text('¡Bienvenido a HabitosApp!',
+              Text('¡Bienvenido a HábitosApp!',
                   style: tema.textTheme.headlineMedium
                       ?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),

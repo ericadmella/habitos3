@@ -16,18 +16,19 @@ class ResultadoFormulario {
 
 /// Formulario para crear, editar o borrar un hábito.
 /// Esta pantalla NO guarda en preferencias: devuelve el resultado a
-/// PrincipalScreen, que es quien llama al servicio.
-class HabitoFormScreen extends StatefulWidget {
+/// PantallaPrincipal, que es quien llama al servicio.
+class PantallaFormularioHabito extends StatefulWidget {
   final Habito? habito;
   final String usuarioId;
 
-  const HabitoFormScreen({super.key, this.habito, this.usuarioId = ''});
+  const PantallaFormularioHabito({super.key, this.habito, this.usuarioId = ''});
 
   @override
-  State<HabitoFormScreen> createState() => _HabitoFormScreenState();
+  State<PantallaFormularioHabito> createState() =>
+      _PantallaFormularioHabitoState();
 }
 
-class _HabitoFormScreenState extends State<HabitoFormScreen> {
+class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
   static const colores = [
     0xFFFF6B6B,
     0xFFFF9F43,

@@ -8,14 +8,21 @@ class CampoTextoApp extends StatelessWidget {
   final TextInputType? teclado;
   final String? Function(String?)? validator;
 
-  const CampoTextoApp({super.key, required this.etiqueta, required this.controller, this.ocultar = false, this.teclado, this.validator});
+  const CampoTextoApp(
+      {super.key,
+      required this.etiqueta,
+      required this.controller,
+      this.ocultar = false,
+      this.teclado,
+      this.validator});
 
   @override
   Widget build(BuildContext context) => TextFormField(
-    controller: controller,
-    obscureText: ocultar,
-    keyboardType: teclado,
-    validator: validator,
-    decoration: InputDecoration(labelText: etiqueta, border: const OutlineInputBorder()),
-  );
+        controller: controller,
+        obscureText: ocultar,
+        keyboardType: teclado,
+        validator: validator,
+        decoration: InputDecoration(
+            labelText: etiqueta, border: const OutlineInputBorder()),
+      );
 }

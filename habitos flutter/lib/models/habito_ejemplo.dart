@@ -24,7 +24,8 @@ class HabitoEjemplo {
     this.completado = false,
   });
 
-  HabitoEjemplo copyWith({String? nombre, ColorHabito? color, bool? completado}) {
+  HabitoEjemplo copyWith(
+      {String? nombre, ColorHabito? color, bool? completado}) {
     return HabitoEjemplo(
       nombre: nombre ?? this.nombre,
       color: color ?? this.color,
