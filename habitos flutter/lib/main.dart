@@ -77,9 +77,8 @@ class _AplicacionHabitosState extends State<AplicacionHabitos> {
       useMaterial3: true,
     );
     return tema.copyWith(
-      textTheme: tema.textTheme.apply(fontSizeFactor: _tamanoLetra),
-      primaryTextTheme:
-          tema.primaryTextTheme.apply(fontSizeFactor: _tamanoLetra),
+      textTheme: _escalarTextTheme(tema.textTheme, _tamanoLetra),
+      primaryTextTheme: _escalarTextTheme(tema.primaryTextTheme, _tamanoLetra),
     );
   }
 
@@ -135,4 +134,31 @@ class _AplicacionHabitosState extends State<AplicacionHabitos> {
       home: pantalla,
     );
   }
+}
+
+TextTheme _escalarTextTheme(TextTheme textTheme, double factor) {
+  TextStyle? escalar(TextStyle? estilo) {
+    final tamano = estilo?.fontSize;
+    return estilo == null || tamano == null
+        ? estilo
+        : estilo.copyWith(fontSize: tamano * factor);
+  }
+
+  return textTheme.copyWith(
+    displayLarge: escalar(textTheme.displayLarge),
+    displayMedium: escalar(textTheme.displayMedium),
+    displaySmall: escalar(textTheme.displaySmall),
+    headlineLarge: escalar(textTheme.headlineLarge),
+    headlineMedium: escalar(textTheme.headlineMedium),
+    headlineSmall: escalar(textTheme.headlineSmall),
+    titleLarge: escalar(textTheme.titleLarge),
+    titleMedium: escalar(textTheme.titleMedium),
+    titleSmall: escalar(textTheme.titleSmall),
+    bodyLarge: escalar(textTheme.bodyLarge),
+    bodyMedium: escalar(textTheme.bodyMedium),
+    bodySmall: escalar(textTheme.bodySmall),
+    labelLarge: escalar(textTheme.labelLarge),
+    labelMedium: escalar(textTheme.labelMedium),
+    labelSmall: escalar(textTheme.labelSmall),
+  );
 }

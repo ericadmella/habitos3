@@ -53,6 +53,14 @@ void main() {
     expect(MediaQuery.textScalerOf(context).scale(10), 20);
   });
 
+  testWidgets('builds the app theme with the saved font size', (tester) async {
+    await PreferenciasService.instance.setTamanoLetra(1.2);
+
+    await tester.pumpWidget(const AplicacionHabitos());
+
+    expect(tester.takeException(), isNull);
+  });
+
   test('clears the previous login session on startup', () async {
     final preferencias = PreferenciasService.instance;
     await preferencias.guardarSesion('usuaria-anterior');
