@@ -8,6 +8,7 @@ class Habito {
   String usuarioId;
   String nombre;
   int color; // valor ARGB, p. ej. 0xFFFF6B6B
+  String icono;
   List<String> fechasCompletadas; // fechas en formato 'yyyy-MM-dd'
 
   Habito({
@@ -15,6 +16,7 @@ class Habito {
     this.usuarioId = '',
     required this.nombre,
     required this.color,
+    this.icono = 'agua',
     List<String>? fechasCompletadas,
   }) : fechasCompletadas = fechasCompletadas ?? [];
 
@@ -24,6 +26,7 @@ class Habito {
         'usuarioId': usuarioId,
         'nombre': nombre,
         'color': color,
+        'icono': icono,
         'fechasCompletadas': fechasCompletadas,
       };
 
@@ -32,6 +35,7 @@ class Habito {
         'usuario_id': usuarioId,
         'nombre': nombre,
         'color': color,
+        'icono': icono,
         'fechas_completadas': jsonEncode(fechasCompletadas),
       };
 
@@ -40,6 +44,7 @@ class Habito {
         usuarioId: json['usuarioId'] as String? ?? '',
         nombre: json['nombre'] as String? ?? '',
         color: json['color'] as int? ?? 0xFFFF7F50,
+        icono: json['icono'] as String? ?? 'agua',
         fechasCompletadas: (json['fechasCompletadas'] as List<dynamic>? ?? [])
             .map((e) => e as String)
             .toList(),
@@ -50,6 +55,7 @@ class Habito {
         usuarioId: row['usuario_id'] as String,
         nombre: row['nombre'] as String,
         color: row['color'] as int,
+        icono: row['icono'] as String? ?? 'agua',
         fechasCompletadas:
             (jsonDecode(row['fechas_completadas'] as String) as List<dynamic>)
                 .cast<String>(),

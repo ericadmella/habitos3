@@ -25,9 +25,14 @@ void main() {
       usuarioId: usuario.id,
       nombre: 'Lectura',
       color: 0xFFFF6B6B,
+      icono: 'lectura',
       fechasCompletadas: [Habito.claveFecha(DateTime.now())],
     );
     await baseDatos.guardarHabito(habito);
+    expect(
+      (await baseDatos.cargarHabitos(usuarioId: usuario.id)).single.icono,
+      'lectura',
+    );
     expect(
       (await baseDatos.cargarUsuarios())
           .map((cuenta) => cuenta.id)
@@ -60,6 +65,7 @@ void main() {
       'usuarioId': 'legacy-user',
       'nombre': 'Caminar',
       'color': 0xFFFF6B6B,
+      'icono': 'caminar',
       'fechasCompletadas': ['2025-01-01'],
     };
     SharedPreferences.setMockInitialValues({
@@ -74,12 +80,11 @@ void main() {
           .map((usuario) => usuario.nombreUsuario),
       contains('luis'),
     );
-    expect(
-      (await BaseDatosLocal.instance.cargarHabitos(usuarioId: 'legacy-user'))
-          .single
-          .nombre,
-      'Caminar',
-    );
+    final habito =
+        (await BaseDatosLocal.instance.cargarHabitos(usuarioId: 'legacy-user'))
+            .single;
+    expect(habito.nombre, 'Caminar');
+    expect(habito.icono, 'caminar');
     expect(preferencias.getStringList('usuarios'), isNull);
     expect(preferencias.getStringList('habitos'), isNull);
   });

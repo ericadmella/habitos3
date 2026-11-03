@@ -4,6 +4,7 @@ import '../models/habito.dart';
 import '../widgets/selector_color.dart';
 import '../widgets/campo_texto_app.dart';
 import '../widgets/boton_principal.dart';
+import '../widgets/iconos_habito.dart';
 
 enum AccionFormulario { crear, editar, borrar }
 
@@ -43,6 +44,7 @@ class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombreCtrl;
   late int _color;
+  late String _icono;
 
   bool get _editando => widget.habito != null;
 
@@ -51,6 +53,7 @@ class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
     super.initState();
     _nombreCtrl = TextEditingController(text: widget.habito?.nombre ?? '');
     _color = widget.habito?.color ?? colores.first;
+    _icono = widget.habito?.icono ?? IconosHabito.porDefecto;
   }
 
   @override
@@ -65,7 +68,8 @@ class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
     if (_editando) {
       final h = widget.habito!
         ..nombre = nombre
-        ..color = _color;
+        ..color = _color
+        ..icono = _icono;
       Navigator.pop(context, ResultadoFormulario(AccionFormulario.editar, h));
     } else {
       final h = Habito(
@@ -75,6 +79,7 @@ class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
         usuarioId: widget.usuarioId,
         nombre: nombre,
         color: _color,
+        icono: _icono,
       );
       Navigator.pop(context, ResultadoFormulario(AccionFormulario.crear, h));
     }
@@ -129,6 +134,47 @@ class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
                   : null,
             ),
             const SizedBox(height: 24),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Icono del hábito',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Elige un icono que represente tu hábito.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.count(
+                      crossAxisCount: 4,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      children: [
+                        for (final opcion in IconosHabito.opciones)
+                          _SelectorIcono(
+                            opcion: opcion,
+                            seleccionado: _icono == opcion.clave,
+                            onTap: () => setState(() => _icono = opcion.clave),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Seleccionado: ${IconosHabito.opciones.firstWhere((opcion) => opcion.clave == _icono, orElse: () => IconosHabito.opciones.first).etiqueta}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text('Color', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             SelectorColor(
@@ -139,6 +185,70 @@ class _PantallaFormularioHabitoState extends State<PantallaFormularioHabito> {
             const SizedBox(height: 32),
             BotonPrincipal(texto: 'Guardar', onPressed: _guardar),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectorIcono extends StatelessWidget {
+  final OpcionIconoHabito opcion;
+  final bool seleccionado;
+  final VoidCallback onTap;
+
+  const _SelectorIcono({
+    required this.opcion,
+    required this.seleccionado,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: opcion.etiqueta,
+      selected: seleccionado,
+      child: Tooltip(
+        message: opcion.etiqueta,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: seleccionado
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: seleccionado
+                    ? colorScheme.primary
+                    : colorScheme.outlineVariant,
+                width: seleccionado ? 2 : 1,
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  opcion.icono,
+                  color: seleccionado
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurfaceVariant,
+                ),
+                if (seleccionado)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 16,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );

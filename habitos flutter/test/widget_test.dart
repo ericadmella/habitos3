@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habitos_app/main.dart';
 import 'package:habitos_app/models/habito.dart';
+import 'package:habitos_app/pantallas/habito_form_screen.dart';
 import 'package:habitos_app/pantallas/estadisticas_page.dart';
 import 'package:habitos_app/servicios/base_datos_local.dart';
 import 'package:habitos_app/servicios/preferencias_service.dart';
@@ -49,6 +50,60 @@ void main() {
 
     final context = tester.element(find.text('HábitosApp'));
     expect(MediaQuery.textScalerOf(context).scale(10), 20);
+  });
+
+  testWidgets('lets the user select an icon for a habit', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: PantallaFormularioHabito()),
+    );
+
+    expect(find.text('Icono del hábito'), findsOneWidget);
+    await tester.tap(find.byTooltip('Lectura'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Seleccionado: Lectura'), findsOneWidget);
+  });
+
+  testWidgets('keeps the chosen icon when editing a habit', (tester) async {
+    final habito = Habito(
+      id: 'caminar',
+      nombre: 'Caminar',
+      color: 0xFFFF6B6B,
+      icono: 'caminar',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () {
+                Navigator.push<void>(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => PantallaFormularioHabito(habito: habito),
+                  ),
+                );
+              },
+              child: const Text('Editar'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Editar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seleccionado: Caminar'), findsOneWidget);
+    await tester.tap(find.byTooltip('Lectura'));
+    await tester.scrollUntilVisible(
+      find.text('Guardar'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+
+    expect(habito.icono, 'lectura');
   });
 
   testWidgets('shows app launch count and last-open time in statistics',

@@ -44,7 +44,7 @@ class BaseDatosLocal {
     _baseDatos = await fabrica.openDatabase(
       ruta,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: 2,
         onConfigure: (db) async => db.execute('PRAGMA foreign_keys = ON'),
         onCreate: (db, version) async {
           await db.execute('''
@@ -65,6 +65,7 @@ class BaseDatosLocal {
               usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
               nombre TEXT NOT NULL,
               color INTEGER NOT NULL,
+              icono TEXT NOT NULL DEFAULT 'agua',
               fechas_completadas TEXT NOT NULL DEFAULT '[]'
             )
           ''');
@@ -77,6 +78,13 @@ class BaseDatosLocal {
           ''');
           await db.execute(
               'CREATE INDEX indice_habitos_usuario ON habitos(usuario_id)');
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            await db.execute(
+              "ALTER TABLE habitos ADD COLUMN icono TEXT NOT NULL DEFAULT 'agua'",
+            );
+          }
         },
       ),
     );
@@ -160,6 +168,7 @@ class BaseDatosLocal {
           usuarioId: usuarioId,
           nombre: datos.nombre,
           color: datos.color,
+          icono: datos.icono,
           fechasCompletadas: datos.fechasCompletadas,
         );
         await tx.insert('habitos', habito.toDatabase(),

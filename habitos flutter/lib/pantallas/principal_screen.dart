@@ -8,6 +8,7 @@ import '../servicios/base_datos_local.dart';
 import '../servicios/preferencias_service.dart';
 import '../widgets/tarjeta_habito.dart';
 import '../widgets/progreso_card.dart';
+import '../widgets/iconos_habito.dart';
 import 'habito_form_screen.dart';
 
 /// Pantalla principal: saludo, progreso del día y lista de hábitos.
@@ -140,6 +141,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                   nombre: h.nombre,
                   color: Color(h.color),
                   completado: h.hechoHoy,
+                  icono: IconosHabito.obtener(h.icono),
                   onCompletar: () => _alternar(h),
                   onEditar: () => _abrirFormulario(h),
                   onEliminar: () => _eliminar(h),
