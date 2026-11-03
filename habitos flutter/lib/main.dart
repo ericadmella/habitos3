@@ -17,18 +17,11 @@ Future<void> main() async {
   await preferencias.init();
   final baseDatos = BaseDatosLocal.instance;
   await baseDatos.inicializar();
+  await preferencias.limpiarSesion();
   await preferencias.registrarApertura();
-  final usuarioActivoId = preferencias.usuarioActivoId;
-  final usuarioActivo = usuarioActivoId == null
-      ? null
-      : await baseDatos.buscarUsuario(usuarioActivoId);
-  if (usuarioActivoId != null && usuarioActivo == null) {
-    await preferencias.limpiarSesion();
-  }
   runApp(
     AplicacionHabitos(
       mostrarBienvenida: !preferencias.onboardingHecho,
-      usuarioInicial: usuarioActivo,
     ),
   );
 }

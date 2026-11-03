@@ -8,6 +8,7 @@ import '../servicios/preferencias_service.dart';
 import '../widgets/boton_principal.dart';
 import '../widgets/campo_texto_app.dart';
 import '../widgets/dato_estadistica.dart';
+import '../widgets/iconos_habito.dart';
 import '../widgets/tarjeta_habito.dart';
 import 'ajustes_screen.dart';
 
@@ -250,6 +251,7 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
       text: habito?.fechasCompletadas.join(', ') ?? '',
     );
     final formKey = GlobalKey<FormState>();
+    var icono = habito?.icono ?? IconosHabito.porDefecto;
     var usuarioId = usuarios.any((u) => u.id == habito?.usuarioId)
         ? habito!.usuarioId
         : usuarios.first.id;
@@ -264,103 +266,133 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
       0xFF5F27CD,
       0xFFFF9FF3,
     ];
+    ModalRoute<dynamic>? rutaDialogo;
     final datos = await showDialog<_DatosHabito>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(habito == null ? 'Crear hábito' : 'Editar hábito'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CampoTextoApp(
-                    etiqueta: 'Nombre del hábito',
-                    controller: nombre,
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Escribe el nombre.'
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: fechasCompletadas,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Fechas completadas',
-                      hintText: 'AAAA-MM-DD, separadas por comas',
-                      border: OutlineInputBorder(),
+      builder: (context) {
+        rutaDialogo = ModalRoute.of(context);
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text(habito == null ? 'Crear hábito' : 'Editar hábito'),
+            content: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CampoTextoApp(
+                      etiqueta: 'Nombre del hábito',
+                      controller: nombre,
+                      validator: (value) =>
+                          value == null || value.trim().isEmpty
+                              ? 'Escribe el nombre.'
+                              : null,
                     ),
-                    validator: _validarFechas,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: usuarioId,
-                    decoration: const InputDecoration(labelText: 'Usuario'),
-                    items: [
-                      for (final usuario in usuarios)
-                        DropdownMenuItem(
-                          value: usuario.id,
-                          child: Text(usuario.nombre),
-                        ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setDialogState(() => usuarioId = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Color',
-                      style: Theme.of(context).textTheme.titleSmall,
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: fechasCompletadas,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'Fechas completadas',
+                        hintText: 'AAAA-MM-DD, separadas por comas',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: _validarFechas,
                     ),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final opcion in colores)
-                        ChoiceChip(
-                          label: CircleAvatar(
-                            radius: 10,
-                            backgroundColor: Color(opcion),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: usuarioId,
+                      decoration: const InputDecoration(labelText: 'Usuario'),
+                      items: [
+                        for (final usuario in usuarios)
+                          DropdownMenuItem(
+                            value: usuario.id,
+                            child: Text(usuario.nombre),
                           ),
-                          selected: color == opcion,
-                          onSelected: (_) =>
-                              setDialogState(() => color = opcion),
-                        ),
-                    ],
-                  ),
-                ],
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setDialogState(() => usuarioId = value);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Icono del hábito',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final opcion in IconosHabito.opciones)
+                          ChoiceChip(
+                            avatar: Icon(opcion.icono, size: 18),
+                            label: Text(opcion.etiqueta),
+                            selected: icono == opcion.clave,
+                            onSelected: (_) =>
+                                setDialogState(() => icono = opcion.clave),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Color',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final opcion in colores)
+                          ChoiceChip(
+                            label: CircleAvatar(
+                              radius: 10,
+                              backgroundColor: Color(opcion),
+                            ),
+                            selected: color == opcion,
+                            onSelected: (_) =>
+                                setDialogState(() => color = opcion),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              BotonPrincipal(
+                texto: 'Guardar',
+                onPressed: () {
+                  if (!formKey.currentState!.validate()) return;
+                  Navigator.pop(
+                    context,
+                    _DatosHabito(
+                      nombre: nombre.text.trim(),
+                      usuarioId: usuarioId,
+                      color: color,
+                      icono: icono,
+                      fechasCompletadas: _parsearFechas(fechasCompletadas.text),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            BotonPrincipal(
-              texto: 'Guardar',
-              onPressed: () {
-                if (!formKey.currentState!.validate()) return;
-                Navigator.pop(
-                  context,
-                  _DatosHabito(
-                    nombre: nombre.text.trim(),
-                    usuarioId: usuarioId,
-                    color: color,
-                    fechasCompletadas: _parsearFechas(fechasCompletadas.text),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
+    await rutaDialogo?.completed;
     nombre.dispose();
     fechasCompletadas.dispose();
     if (datos == null) return;
@@ -371,6 +403,7 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
         usuarioId: datos.usuarioId,
         nombre: datos.nombre,
         color: datos.color,
+        icono: datos.icono,
         fechasCompletadas: datos.fechasCompletadas,
       ),
     );
@@ -646,6 +679,7 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
               nombre: '${habito.nombre} · ${_nombreUsuario(habito.usuarioId)}',
               color: Color(habito.color),
               completado: habito.hechoHoy,
+              icono: IconosHabito.obtener(habito.icono),
               onCompletar: () => _alternarHabito(habito),
               onEditar: () => _editarHabito(habito),
               onEliminar: () => _eliminarHabito(habito),
@@ -770,12 +804,14 @@ class _DatosHabito {
   final String nombre;
   final String usuarioId;
   final int color;
+  final String icono;
   final List<String> fechasCompletadas;
 
   const _DatosHabito({
     required this.nombre,
     required this.usuarioId,
     required this.color,
+    required this.icono,
     required this.fechasCompletadas,
   });
 }

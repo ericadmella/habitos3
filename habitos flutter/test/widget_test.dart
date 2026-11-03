@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habitos_app/main.dart';
 import 'package:habitos_app/models/habito.dart';
+import 'package:habitos_app/pantallas/administracion_page.dart';
 import 'package:habitos_app/pantallas/habito_form_screen.dart';
 import 'package:habitos_app/pantallas/estadisticas_page.dart';
 import 'package:habitos_app/servicios/base_datos_local.dart';
@@ -50,6 +51,15 @@ void main() {
 
     final context = tester.element(find.text('HábitosApp'));
     expect(MediaQuery.textScalerOf(context).scale(10), 20);
+  });
+
+  test('clears the previous login session on startup', () async {
+    final preferencias = PreferenciasService.instance;
+    await preferencias.guardarSesion('usuaria-anterior');
+
+    await preferencias.limpiarSesion();
+
+    expect(preferencias.usuarioActivoId, isNull);
   });
 
   testWidgets('lets the user select an icon for a habit', (tester) async {
@@ -104,6 +114,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(habito.icono, 'lectura');
+  });
+
+  testWidgets('shows and saves selected icons in habit administration',
+      (tester) async {
+    final servicio = BaseDatosLocal.instance;
+    await servicio.registrarUsuario(
+      nombre: 'Ana',
+      apellidos: 'Pérez',
+      email: 'ana@example.com',
+      nombreUsuario: 'ana',
+      contrasena: 'clave',
+    );
+    final administrador = (await servicio.cargarUsuarios())
+        .singleWhere((usuario) => usuario.esAdministrador);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PaginaAdministracion(
+          administrador: administrador,
+          onCerrarSesion: () async {},
+          onTemaCambiado: (_) {},
+          onLetraCambiada: (_) {},
+          onDatosBorrados: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hábitos').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Crear hábito'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'Lectura');
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Lectura'));
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+
+    final habito = (await servicio.cargarHabitos()).single;
+    expect(habito.icono, 'lectura');
+    expect(find.byIcon(Icons.menu_book), findsOneWidget);
   });
 
   testWidgets('shows app launch count and last-open time in statistics',
