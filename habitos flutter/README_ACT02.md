@@ -23,7 +23,8 @@ administración es `admin` / `admin`.
 - `editar_habito_page.dart`: abre el mismo formulario para crear y editar.
 - `estadisticas_page.dart`: muestra la racha y los días completados de cada hábito.
 - `administracion_page.dart`: permite al administrador gestionar usuarios y
-  hábitos y consultar estadísticas globales.
+  hábitos y consultar estadísticas globales. Al entrar, muestra un panel con
+  accesos directos a usuarios, hábitos, estadísticas y ajustes.
 
 Las cuentas nuevas solo pueden consultar y modificar sus propios hábitos. El
 administrador puede gestionar las cuentas y los hábitos de la aplicación.

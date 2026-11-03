@@ -39,6 +39,18 @@ void main() {
     expect(find.text('Iniciar sesión'), findsOneWidget);
   });
 
+  testWidgets('respects the device text scaler', (tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: AplicacionHabitos(),
+      ),
+    );
+
+    final context = tester.element(find.text('HábitosApp'));
+    expect(MediaQuery.textScalerOf(context).scale(10), 20);
+  });
+
   testWidgets('shows app launch count and last-open time in statistics',
       (tester) async {
     final preferencias = PreferenciasService.instance;
@@ -111,11 +123,18 @@ void main() {
     await tester.tap(find.text('Entrar'));
     await _pumpAfterDatabase(tester);
 
+    expect(find.text('Panel de administración'), findsOneWidget);
+    expect(find.text('Gestionar usuarios'), findsOneWidget);
+    expect(find.text('Gestionar hábitos'), findsOneWidget);
+    expect(find.text('Estadísticas globales'), findsOneWidget);
+    expect(find.text('Ajustes'), findsNWidgets(2));
+    await tester.tap(find.text('Gestionar usuarios'));
+    await tester.pumpAndSettle();
     expect(find.text('Gestión de usuarios'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.checklist));
+    await tester.tap(find.text('Hábitos').last);
     await tester.pumpAndSettle();
     expect(find.text('Gestión de hábitos'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.bar_chart));
+    await tester.tap(find.text('Estadísticas').last);
     await tester.pumpAndSettle();
     expect(find.text('Estadísticas globales'), findsOneWidget);
   });

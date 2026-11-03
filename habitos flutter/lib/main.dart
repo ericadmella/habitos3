@@ -77,9 +77,21 @@ class _AplicacionHabitosState extends State<AplicacionHabitos> {
     });
   }
 
+  ThemeData _crearTema(Brightness brillo) {
+    final tema = ThemeData(
+      colorSchemeSeed: const Color(0xFFFF7F50),
+      brightness: brillo,
+      useMaterial3: true,
+    );
+    return tema.copyWith(
+      textTheme: tema.textTheme.apply(fontSizeFactor: _tamanoLetra),
+      primaryTextTheme:
+          tema.primaryTextTheme.apply(fontSizeFactor: _tamanoLetra),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    const semilla = Color(0xFFFF7F50);
     final usuario = _usuario;
     final pantalla = _mostrarBienvenida
         ? PantallaBienvenida(
@@ -124,22 +136,9 @@ class _AplicacionHabitosState extends State<AplicacionHabitos> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(
-        colorSchemeSeed: semilla,
-        brightness: Brightness.light,
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: semilla,
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
+      theme: _crearTema(Brightness.light),
+      darkTheme: _crearTema(Brightness.dark),
       themeMode: _temaOscuro ? ThemeMode.dark : ThemeMode.light,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(textScaler: TextScaler.linear(_tamanoLetra)),
-        child: child!,
-      ),
       home: pantalla,
     );
   }

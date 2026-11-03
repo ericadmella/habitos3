@@ -444,9 +444,10 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
     }
 
     final titulo = switch (_pestana) {
-      0 => 'Gestión de usuarios',
-      1 => 'Gestión de hábitos',
-      2 => 'Estadísticas globales',
+      0 => 'Panel de administración',
+      1 => 'Gestión de usuarios',
+      2 => 'Gestión de hábitos',
+      3 => 'Estadísticas globales',
       _ => 'Ajustes',
     };
 
@@ -463,9 +464,10 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
       ),
       body: SafeArea(
         child: switch (_pestana) {
-          0 => _vistaUsuarios(context),
-          1 => _vistaHabitos(context),
-          2 => _vistaEstadisticas(context),
+          0 => _vistaInicio(context),
+          1 => _vistaUsuarios(context),
+          2 => _vistaHabitos(context),
+          3 => _vistaEstadisticas(context),
           _ => PantallaAjustes(
               onTemaCambiado: widget.onTemaCambiado,
               onLetraCambiada: widget.onLetraCambiada,
@@ -473,11 +475,11 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
             ),
         },
       ),
-      floatingActionButton: _pestana >= 2
+      floatingActionButton: _pestana == 0 || _pestana >= 3
           ? null
           : FloatingActionButton(
-              tooltip: _pestana == 0 ? 'Crear usuario' : 'Crear hábito',
-              onPressed: _pestana == 0
+              tooltip: _pestana == 1 ? 'Crear usuario' : 'Crear hábito',
+              onPressed: _pestana == 1
                   ? () => _editarUsuario()
                   : () => _editarHabito(),
               child: const Icon(Icons.add),
@@ -487,23 +489,100 @@ class _PaginaAdministracionState extends State<PaginaAdministracion> {
         onDestinationSelected: (index) => setState(() => _pestana = index),
         destinations: const [
           NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: 'Inicio',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.people_outline),
+            selectedIcon: Icon(Icons.people),
             label: 'Usuarios',
           ),
           NavigationDestination(
-            icon: Icon(Icons.checklist),
+            icon: Icon(Icons.checklist_outlined),
+            selectedIcon: Icon(Icons.checklist),
             label: 'Hábitos',
           ),
           NavigationDestination(
-            icon: Icon(Icons.bar_chart),
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
             label: 'Estadísticas',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
             label: 'Ajustes',
           ),
         ],
       ),
+    );
+  }
+
+  Widget _vistaInicio(BuildContext context) {
+    final tema = Theme.of(context);
+    final opciones = [
+      (
+        titulo: 'Gestionar usuarios',
+        detalle: '${_usuarios.length} cuentas registradas',
+        icono: Icons.people_outline,
+        pestana: 1,
+      ),
+      (
+        titulo: 'Gestionar hábitos',
+        detalle: '${_habitos.length} hábitos registrados',
+        icono: Icons.checklist,
+        pestana: 2,
+      ),
+      (
+        titulo: 'Estadísticas globales',
+        detalle: 'Consulta el progreso de los hábitos',
+        icono: Icons.bar_chart,
+        pestana: 3,
+      ),
+      (
+        titulo: 'Ajustes',
+        detalle: 'Personaliza la apariencia y los datos',
+        icono: Icons.settings_outlined,
+        pestana: 4,
+      ),
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          'Hola, ${widget.administrador.nombre}',
+          style: tema.textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Elige una opción para administrar la aplicación.',
+          style: tema.textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 16),
+        for (final opcion in opciones)
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              leading: Icon(
+                opcion.icono,
+                color: tema.colorScheme.primary,
+                size: 28,
+              ),
+              title: Text(
+                opcion.titulo,
+                style: tema.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(opcion.detalle),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+              onTap: () => setState(() => _pestana = opcion.pestana),
+            ),
+          ),
+      ],
     );
   }
 
